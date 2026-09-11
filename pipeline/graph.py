@@ -15,6 +15,11 @@ from config.knowledge_base import (
     INDUSTRY_ACCELERATORS, DATA_QUALITY_5_DIMENSIONS,
     DATA_CLASSIFICATION_LEVELS, DGA_MANDATORY_METADATA_FIELDS
 )
+from config.healthcare_extended import (
+    HEALTHCARE_10_USE_CASES,
+    FULL_42_RACI_ACTIVITIES,
+    HEALTHCARE_12_CATALOG_RECORDS
+)
 from builders.xlsx_builder import (
     build_financial_and_tco_workbook,
     build_governance_and_catalog_workbook
@@ -53,27 +58,30 @@ def strategy_and_usecases_node(state: DataGovConsultantState) -> Dict[str, Any]:
     ind = client.industry.lower()
     accelerator = INDUSTRY_ACCELERATORS.get(ind, INDUSTRY_ACCELERATORS["healthcare"])
     
-    use_cases = []
-    for raw in accelerator["high_value_use_cases"]:
-        benefit = raw.get("annual_benefit", 10_000_000.0)
-        cost = raw.get("cost", 2_000_000.0)
-        payback = round((cost / benefit) * 12, 1) if benefit > 0 else 0
-        tier = "Quick Win" if raw["impact"] >= 4 and raw["feasibility"] >= 4 else "Strategic Bet"
+    if ind == "healthcare":
+        use_cases = list(HEALTHCARE_10_USE_CASES)
+    else:
+        use_cases = []
+        for raw in accelerator["high_value_use_cases"]:
+            benefit = raw.get("annual_benefit", 10_000_000.0)
+            cost = raw.get("cost", 2_000_000.0)
+            payback = round((cost / benefit) * 12, 1) if benefit > 0 else 0
+            tier = "Quick Win" if raw["impact"] >= 4 and raw["feasibility"] >= 4 else "Strategic Bet"
 
-        uc = UseCaseItem(
-            id=raw["id"],
-            title=raw["title"],
-            business_unit=accelerator["name_th"].split("(")[0].strip(),
-            business_problem=raw["benefit_desc"].split(".")[0],
-            impact_score=raw["impact"],
-            feasibility_score=raw["feasibility"],
-            estimated_annual_benefit_thb=benefit,
-            implementation_cost_thb=cost,
-            payback_months=payback,
-            priority_tier=tier,
-            required_datasets=raw["target_data"]
-        )
-        use_cases.append(uc)
+            uc = UseCaseItem(
+                id=raw["id"],
+                title=raw["title"],
+                business_unit=accelerator["name_th"].split("(")[0].strip(),
+                business_problem=raw["benefit_desc"].split(".")[0],
+                impact_score=raw["impact"],
+                feasibility_score=raw["feasibility"],
+                estimated_annual_benefit_thb=benefit,
+                implementation_cost_thb=cost,
+                payback_months=payback,
+                priority_tier=tier,
+                required_datasets=raw["target_data"]
+            )
+            use_cases.append(uc)
 
     return {
         "use_cases": use_cases
@@ -86,55 +94,41 @@ def governance_and_raci_node(state: DataGovConsultantState) -> Dict[str, Any]:
     ind = client.industry.lower()
     accelerator = INDUSTRY_ACCELERATORS.get(ind, INDUSTRY_ACCELERATORS["healthcare"])
     
-    # Generate standard 10 representative RACI activities across the 6-stage lifecycle
-    raci_data = [
-        RACIItem(task_id="DG-01", category="Planning", activity_name="กำหนดเป้าหมายและวิสัยทัศน์ธรรมาภิบาลข้อมูลระดับองค์กร",
-                 data_council="A", lead_data_steward="R", data_owner="C", data_steward_team="S", data_custodian_it="I", data_creator="I", data_user="I", dpo_legal="C"),
-        RACIItem(task_id="DG-02", category="Create", activity_name="กำหนดมาตรฐานเมทาดาตา 14 ฟิลด์และลงทะเบียนชุดข้อมูลใหม่",
-                 data_council="I", lead_data_steward="A", data_owner="C", data_steward_team="R", data_custodian_it="S", data_creator="R", data_user="I", dpo_legal="I"),
-        RACIItem(task_id="DG-03", category="Store", activity_name="จัดชั้นความลับข้อมูล (Classification) และควบคุมการเข้ารหัส",
-                 data_council="I", lead_data_steward="C", data_owner="A", data_steward_team="S", data_custodian_it="R", data_creator="I", data_user="I", dpo_legal="R"),
-        RACIItem(task_id="DG-04", category="Use", activity_name="อนุมัติสิทธิ์การเข้าถึงข้อมูลตามบทบาท (Role-Based Access Control)",
-                 data_council="I", lead_data_steward="I", data_owner="A", data_steward_team="C", data_custodian_it="R", data_creator="I", data_user="R", dpo_legal="C"),
-        RACIItem(task_id="DG-05", category="Publish", activity_name="ตรวจสอบข้อมูลส่วนบุคคลอ่อนไหว (PDPA ม.26) ก่อนเปิดเผยหรือเชื่อมโยง",
-                 data_council="I", lead_data_steward="C", data_owner="A", data_steward_team="S", data_custodian_it="I", data_creator="I", data_user="I", dpo_legal="R"),
-        RACIItem(task_id="DG-06", category="Archive", activity_name="ทดสอบแผนกู้คืนข้อมูลถาวร (Disaster Recovery & Restore Drill) ประจำปี",
-                 data_council="I", lead_data_steward="I", data_owner="I", data_steward_team="I", data_custodian_it="R", data_creator="I", data_user="I", dpo_legal="I"),
-        RACIItem(task_id="DG-07", category="Destroy", activity_name="พิจารณาอนุมัติทำลายข้อมูลที่พ้นกำหนดระยะเวลาจัดเก็บตามกฎหมาย",
-                 data_council="A", lead_data_steward="C", data_owner="R", data_steward_team="S", data_custodian_it="R", data_creator="I", data_user="I", dpo_legal="C"),
-        RACIItem(task_id="DG-08", category="AI Model", activity_name="ตรวจสอบและทำ De-identification ข้อมูลก่อนส่งมอบให้ทีมเทรน AI",
-                 data_council="I", lead_data_steward="A", data_owner="C", data_steward_team="R", data_custodian_it="S", data_creator="I", data_user="R", dpo_legal="A"),
-        RACIItem(task_id="DG-09", category="Quality", activity_name="ตรวจประเมินคุณภาพข้อมูล 5 มิติ (DQA Checklist) ทุกไตรมาส",
-                 data_council="I", lead_data_steward="A", data_owner="C", data_steward_team="R", data_custodian_it="S", data_creator="S", data_user="C", dpo_legal="I"),
-        RACIItem(task_id="DG-10", category="Review", activity_name="รายงานผลการดำเนินงานธรรมาภิบาลข้อมูลต่อคณะกรรมการ (Council)",
-                 data_council="A", lead_data_steward="R", data_owner="C", data_steward_team="S", data_custodian_it="I", data_creator="I", data_user="I", dpo_legal="C")
-    ]
+    # Use full 42 activities covering 9 lifecycle categories
+    raci_data = list(FULL_42_RACI_ACTIVITIES)
 
-    # Generate Data Catalog items matching client industry dynamically
+    # Generate Data Catalog items matching client industry
     cat_items = []
-    catalog_templates = accelerator.get("default_catalog", [])
-    email_domain = client.name.lower().replace(" ", "").replace("(", "").replace(")", "").replace(".", "")[:12] + ".co.th"
+    if ind == "healthcare":
+        for rec in HEALTHCARE_12_CATALOG_RECORDS:
+            # Customize owner organization to client name
+            custom_rec = rec.model_copy()
+            custom_rec.owner_org = client.name
+            cat_items.append(custom_rec)
+    else:
+        catalog_templates = accelerator.get("default_catalog", [])
+        email_domain = client.name.lower().replace(" ", "").replace("(", "").replace(")", "").replace(".", "")[:12] + ".co.th"
 
-    for idx, c in enumerate(catalog_templates, start=1):
-        rec = MetadataRecord(
-            no=float(idx),
-            title=c["title"],
-            owner_org=client.name,
-            maintainer=c["maintainer"],
-            maintainer_email=f"data_team@{email_domain}",
-            tag_string=c["tag_string"],
-            notes=c["notes"],
-            objective=c["objective"],
-            update_frequency=c["frequency"],
-            geo_coverage=c["geo"],
-            data_source=c["source"],
-            data_format=c["format"],
-            data_category=c["category"],
-            license_id=c["license"],
-            data_quality_score=c["score"],
-            classification_level=c["classification"]
-        )
-        cat_items.append(rec)
+        for idx, c in enumerate(catalog_templates, start=1):
+            rec = MetadataRecord(
+                no=float(idx),
+                title=c["title"],
+                owner_org=client.name,
+                maintainer=c["maintainer"],
+                maintainer_email=f"data_team@{email_domain}",
+                tag_string=c["tag_string"],
+                notes=c["notes"],
+                objective=c["objective"],
+                update_frequency=c["frequency"],
+                geo_coverage=c["geo"],
+                data_source=c["source"],
+                data_format=c["format"],
+                data_category=c["category"],
+                license_id=c["license"],
+                data_quality_score=c["score"],
+                classification_level=c["classification"]
+            )
+            cat_items.append(rec)
 
     return {
         "current_sprint": 2,

@@ -32,7 +32,7 @@ def test_knowledge_base_completeness():
     print("✅ test_knowledge_base_completeness passed.")
 
 
-def test_pipeline_execution():
+def test_pipeline_execution_retail():
     """Verify end-to-end execution of a consulting sprint for retail"""
     client = ClientOrganization(
         name="Test Retail Enterprise",
@@ -63,7 +63,7 @@ def test_pipeline_execution():
 
     assert final_state["current_sprint"] == 4
     assert len(final_state["use_cases"]) >= 3
-    assert len(final_state["raci_matrix"]) == 10
+    assert len(final_state["raci_matrix"]) >= 40
     assert len(final_state["data_catalog"]) >= 3
     assert len(final_state["cloud_tco"]) == 4
     assert len(final_state["deliverable_paths"]) == 4
@@ -71,10 +71,53 @@ def test_pipeline_execution():
     for key, path in final_state["deliverable_paths"].items():
         assert os.path.exists(path), f"Deliverable {key} not found at {path}"
 
-    print("✅ test_pipeline_execution passed.")
+    print("✅ test_pipeline_execution_retail passed.")
+
+
+def test_pipeline_execution_healthcare():
+    """Verify full-length execution for healthcare (10 use cases, 42 RACI items, 12 catalog datasets)"""
+    client = ClientOrganization(
+        name="โรงพยาบาลกรุงเทพสมาร์ทเฮลท์แคร์",
+        industry="healthcare",
+        organization_size="Large Enterprise (400 เตียง)",
+        annual_revenue_thb=1_200_000_000.0,
+        current_systems=["HIS", "PACS", "LIS", "ERP", "CRM"],
+        primary_pain_points=["HN ซ้ำซ้อน", "ข้อมูลไอทีแยกส่วน", "PDPA ม.26", "เบี้ยวนัดสูง", "เตียงรอ"],
+        target_objectives=["Data Catalog", "Big Data Lakehouse", "Clinical AI"]
+    )
+    initial_state = {
+        "client": client,
+        "current_sprint": 0,
+        "maturity_score": 0,
+        "maturity_narrative": "",
+        "use_cases": [],
+        "raci_matrix": [],
+        "data_catalog": [],
+        "cloud_tco": [],
+        "ai_governance_framework": {},
+        "change_management_plan": {},
+        "audit_notes": [],
+        "gate_approved": {},
+        "deliverable_paths": {}
+    }
+    app = build_consultant_pipeline()
+    final_state = app.invoke(initial_state)
+
+    assert final_state["current_sprint"] == 4
+    assert len(final_state["use_cases"]) == 10
+    assert len(final_state["raci_matrix"]) >= 42
+    assert len(final_state["data_catalog"]) == 12
+    assert len(final_state["cloud_tco"]) == 4
+    assert len(final_state["deliverable_paths"]) == 4
+
+    for key, path in final_state["deliverable_paths"].items():
+        assert os.path.exists(path), f"Deliverable {key} not found at {path}"
+
+    print("✅ test_pipeline_execution_healthcare (10 Use Cases, 42 RACI, 12 Catalogs) passed.")
 
 
 if __name__ == "__main__":
     test_knowledge_base_completeness()
-    test_pipeline_execution()
+    test_pipeline_execution_retail()
+    test_pipeline_execution_healthcare()
     print("\n🎉 ALL TESTS PASSED SUCCESSFULLY!")

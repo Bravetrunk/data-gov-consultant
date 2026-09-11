@@ -1,0 +1,33 @@
+{
+  "name": "data-gov-consultant",
+  "version": "1.0.0",
+  "description": "AI-Native Data Governance, Big Data & AI Transformation Consulting Engine",
+  "main": "bin/cli.js",
+  "bin": {
+    "data-gov-consultant": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node ./bin/cli.js",
+    "consult": "node ./bin/cli.js run",
+    "test": ".venv/bin/python main.py"
+  },
+  "keywords": [
+    "data-governance",
+    "ai-governance",
+    "big-data",
+    "data-architecture",
+    "transformation",
+    "consulting",
+    "claude-code",
+    "codex",
+    "dga",
+    "dama",
+    "iso42001",
+    "pdpa"
+  ],
+  "author": "data-gov-consultant practice",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -5,6 +5,148 @@
 
 ---
 
+## 🏛️ สถาปัตยกรรมระบบ Agent (Agent Architecture & Workflow)
+
+ระบบ `data-gov-consultant` ทำงานผ่าน 3 ชั้นสถาปัตยกรรมหลัก: **(1) Multi-Agent Consulting Ensemble**, **(2) The 4-Sprint Stage-Gated Assembly Line**, และ **(3) Document Compilation Engine**:
+
+### 1. โครงสร้างและการสื่อสารของทีม Agent 7 บทบาท (Multi-Agent Topology)
+
+```mermaid
+flowchart TD
+    Client(["🏢 องค์กรลูกค้า (Client Organization)<br>• Pain Points & ข้อมูลระบบเดิม<br>• เป้าหมายทางธุรกิจ & งบประมาณ"]) --> |"Input Profile"| Orchestrator
+
+    subgraph Knowledge_Core ["📚 Governing Knowledge & Standards"]
+        KB_DG["DGA 14 ฟิลด์ Metadata<br>DAMA-DMBOK & PDPA ม.26"]
+        KB_AI["ISO/IEC 42001 (AIMS)<br>NIST AI RMF & ETDA Guidelines"]
+        KB_IND["คลัง 5 อุตสาหกรรม<br>(Healthcare, Retail, MFG, Gov, BFSI)"]
+    end
+
+    subgraph Consulting_Ensemble ["👥 คณะทำงานที่ปรึกษาเสมือน (Virtual Consulting Practice)"]
+        Orchestrator["👑 1. Managing Partner<br>(Project Lead & Strategy)"]
+        
+        Agent_Value["💰 2. Business Value Architect<br>• KPI Trees & 2x2 Matrix<br>• Financial ROI & Payback"]
+        Agent_Gov["📜 3. Governance Specialist<br>• Council/Steward Structure<br>• RACI Matrix 40+ Tasks<br>• 6-Stage Lifecycle Policies"]
+        Agent_Data["🏗️ 4. Chief Big Data Architect<br>• Modern Data Lakehouse<br>• ETL/ELT Pipeline Design<br>• 3-Year Cloud TCO Model"]
+        Agent_AI["🧠 5. AI & Analytics Lead<br>• ML/GenAI Specifications<br>• ISO 42001 AI Risk Tiers<br>• Training Data Governance"]
+        Agent_Change["🌱 6. Change Management Lead<br>• Data Literacy Curriculum<br>• People & Adoption Strategy"]
+        
+        Gatekeeper["🛡️ 7. Quality Review Partner (Red-Teamer)<br>• Cross-Document Consistency Check<br>• Financial Formula & Feasibility Audit<br>• Gate 1-4 Binding Sign-Off"]
+    end
+
+    Knowledge_Core -.-> |"Standards Baseline"| Consulting_Ensemble
+
+    Orchestrator <--> Agent_Value
+    Orchestrator <--> Agent_Gov
+    Orchestrator <--> Agent_Data
+    Orchestrator <--> Agent_AI
+    Orchestrator <--> Agent_Change
+
+    Agent_Value --> Gatekeeper
+    Agent_Gov --> Gatekeeper
+    Agent_Data --> Gatekeeper
+    Agent_AI --> Gatekeeper
+    Agent_Change --> Gatekeeper
+
+    Gatekeeper --> |"Audited & Approved"| Deliverables(["📦 Executive Boardroom Deliverables Suite<br>• 01_FINANCIAL_ROI_&_CLOUD_TCO_MODEL.xlsx<br>• 02_GOVERNANCE_RACI_&_DATA_CATALOG.xlsx<br>• 03_TRANSFORMATION_MASTER_BLUEPRINT.docx<br>• 04_EXECUTIVE_BOARD_DECK.md"])
+    Gatekeeper -.-> |"Reject & Remediate"| Orchestrator
+```
+
+---
+
+### 2. กระบวนการ 4-Sprint Stage-Gated Assembly Line & The Bridge Gate
+
+```mermaid
+stateDiagram-v2
+    [*] --> Sprint1_BusinessStrategy : Onboarding
+
+    state Sprint1_BusinessStrategy {
+        [*] --> DiscoverPainPoints
+        DiscoverPainPoints --> BuildKPITree
+        BuildKPITree --> Prioritize2x2Matrix
+        Prioritize2x2Matrix --> CalculateFinancialROI
+        CalculateFinancialROI --> Gate1_Check
+    }
+
+    Gate1_Check --> Sprint2_DataGovernance : Gate 1 Passed (Sponsor Approval)
+    Gate1_Check --> Sprint1_BusinessStrategy : Revise ROI Assumptions
+
+    state Sprint2_DataGovernance {
+        [*] --> DesignCouncilAndStewards
+        DesignCouncilAndStewards --> ConstructRACIMatrix
+        ConstructRACIMatrix --> Draft6StagePolicies
+        Draft6StagePolicies --> EnforcePDPASecurity
+        EnforcePDPASecurity --> Gate2_Check
+    }
+
+    Gate2_Check --> Sprint3_BigDataArchitecture : Gate 2 Passed (Council Formalized)
+    Gate2_Check --> Sprint2_DataGovernance : Refine Roles & Approvals
+
+    state Sprint3_BigDataArchitecture {
+        [*] --> DesignLakehouseTopology
+        DesignLakehouseTopology --> BlueprintETLPipelines
+        BlueprintETLPipelines --> CatalogHighValueData_14Fields
+        CatalogHighValueData_14Fields --> BenchmarkCloudTCO_3Years
+        BenchmarkCloudTCO_3Years --> AuditDataQuality_5Dimensions
+        AuditDataQuality_5Dimensions --> Bridge_Gate_3
+    }
+
+    Bridge_Gate_3 --> Sprint4_AITransformation : Gate 3 Passed (DQ >= 80% & Data Classified)
+    Bridge_Gate_3 --> Sprint3_BigDataArchitecture : Cleanse & Fix Nulls/Formats
+
+    state Sprint4_AITransformation {
+        [*] --> InventoryAISystems
+        InventoryAISystems --> TierAIRisks_ISO42001
+        TierAIRisks_ISO42001 --> DeIdentifyTrainingData
+        DeIdentifyTrainingData --> DraftDataLiteracyCurriculum
+        DraftDataLiteracyCurriculum --> Gate4_FinalAudit
+    }
+
+    Gate4_FinalAudit --> BuildDeliverablesPackage : Gate 4 Passed (100% Quality Pass)
+    BuildDeliverablesPackage --> [*] : Turnkey Boardroom Package Delivered
+```
+
+---
+
+### 3. สถาปัตยกรรมทางเทคนิคของระบบ (LangGraph Execution & Document Engine)
+
+```mermaid
+graph TD
+    CLI["Node.js CLI (bin/cli.js) / npx"] --> |"Spawn Process & Parameters"| Main["Python Engine (main.py)"]
+    
+    subgraph LangGraph_Runtime ["LangGraph StateGraph Engine"]
+        State["TypedDict State: DataGovConsultantState<br>• Client Profile & Systems<br>• Use-Case Financials<br>• 10-Task RACI Array<br>• Metadata & DQ Scores<br>• 3-Year Cloud TCO Models<br>• ISO 42001 Risk Register"]
+        
+        N1["Node: intake_and_diagnose"] --> N2["Node: strategy_and_usecases"]
+        N2 --> N3["Node: governance_and_raci"]
+        N3 --> N4["Node: bigdata_and_tco"]
+        N4 --> N5["Node: ai_and_change"]
+        N5 --> N6["Node: quality_gatekeeper"]
+        N6 --> N7["Node: generate_deliverables"]
+        
+        N1 <--> State
+        N2 <--> State
+        N3 <--> State
+        N4 <--> State
+        N5 <--> State
+        N6 <--> State
+        N7 <--> State
+    end
+
+    Main --> LangGraph_Runtime
+
+    subgraph Document_Engines ["Compilation & Output Builders"]
+        N7 --> |"openpyxl"| B_XLSX["xlsx_builder.py<br>• Auto-calculated ROI formulas<br>• Cloud TCO comparisons<br>• DGA 14-field Catalog<br>• 5D Quality weighted scoring"]
+        N7 --> |"python-docx"| B_DOCX["docx_builder.py<br>• 60+ Page Master Blueprint<br>• Typography & Executive Styling<br>• Ready-to-Sign Council Order"]
+        N7 --> |"markdown"| B_MD["markdown_builder.py<br>• 6-Slide Executive Board Deck<br>• Audit Gate Approval Memos"]
+    end
+
+    B_XLSX --> Out_XLSX["📗 01_FINANCIAL_ROI_&_CLOUD_TCO_MODEL.xlsx<br>📘 02_GOVERNANCE_RACI_&_DATA_CATALOG.xlsx"]
+    B_DOCX --> Out_DOCX["📕 03_TRANSFORMATION_MASTER_BLUEPRINT.docx"]
+    B_MD --> Out_MD["📄 04_EXECUTIVE_BOARD_DECK.md"]
+```
+
+---
+
 ## 📦 1. วิธีติดตั้งและใช้งานผ่าน Node Package
 
 ระบบรองรับการเรียกใช้งานผ่าน Node.js CLI และ npm ecosystem ทำให้สามารถเรียกใช้งานผ่านคำสั่งเดียวได้ทันที
